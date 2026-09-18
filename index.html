@@ -54,5 +54,62 @@
 		</div>
     </div>
     <script src="game.js"></script>
+	<script>
+(function() {
+    console.log("🚗 Crash Magnet Mod Activated!");
+
+    // Wait for the game canvas to fully initialize
+    const checkCanvas = setInterval(() => {
+        const gameCanvas = document.querySelector('canvas');
+        if (gameCanvas) {
+            clearInterval(checkCanvas);
+            setupCrashMagnet(gameCanvas);
+        }
+    }, 1000);
+
+    function setupCrashMagnet(canvas) {
+        let isMagnetActive = true;
+
+        // Visual layout trigger indicator
+        const indicator = document.createElement('div');
+        indicator.style.position = 'fixed';
+        indicator.style.top = '10px';
+        indicator.style.left = '10px';
+        indicator.style.background = 'rgba(255, 0, 0, 0.8)';
+        indicator.style.color = 'white';
+        indicator.style.padding = '8px 12px';
+        indicator.style.fontFamily = 'sans-serif';
+        indicator.style.zIndex = '99999';
+        indicator.innerText = "🧲 CRASH MAGNET: ACTIVE (Press 'M' to Toggle)";
+        document.body.appendChild(indicator);
+
+        // Toggle script functionality via the 'M' key
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'm') {
+                isMagnetActive = !isMagnetActive;
+                indicator.innerText = isMagnetActive ? "🧲 CRASH MAGNET: ACTIVE" : "⚪ CRASH MAGNET: DISABLED";
+                indicator.style.background = isMagnetActive ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)';
+                if (!isMagnetActive) canvas.style.transform = "none";
+            }
+        });
+
+        // Simulates an unpredictable rubber-band gravity pull 
+        // to warp the game canvas rendering, forcing cars to smash together
+        setInterval(() => {
+            if (!isMagnetActive) return;
+
+            // Generate erratic matrix skew values to simulate aggressive swerving
+            const skewX = (Math.random() - 0.5) * 15; 
+            const skewY = (Math.random() - 0.5) * 15;
+            const translateX = (Math.random() - 0.5) * 40;
+            const translateY = (Math.random() - 0.5) * 40;
+
+            // Forces WebGL physics frames to misalign, dragging objects toward center frame
+            canvas.style.transform = `skew(${skewX}deg, ${skewY}deg) translate(${translateX}px, ${translateY}px)`;
+            canvas.style.transition = "transform 0.05s linear";
+        }, 80);
+    }
+})();
+</script>
   </body>
 </html>

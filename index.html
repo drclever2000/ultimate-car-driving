@@ -50,7 +50,14 @@
 					</div>
 				</div>
 			</div>
-			<script>
+<div id="errorContent" style="display:none;">
+					<div class="errorBrowserText">
+					</div>
+					<div class="browserIcons">
+					</div>
+				</div>
+			</div>
+<script>
 (function() {
     console.log("🎯 Hunter AI Mod Initialized!");
 
@@ -65,7 +72,6 @@
     function activateHunterAI(canvas) {
         let aiActive = true;
 
-        // On-screen control HUD
         const hud = document.createElement('div');
         hud.style = 'position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.85); color:#ff3333; padding:10px 15px; font-family:monospace; font-weight:bold; border:2px solid #ff0000; z-index:99999; border-radius:5px;';
         hud.innerText = "🚨 TRAFFIC HUNTER AI: ACTIVE [Press 'H' to Toggle]";
@@ -80,19 +86,15 @@
             }
         });
 
-        // Intercepts the WebGL rendering context to pull entity vectors toward player space
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (gl) {
             const originalDrawElements = gl.drawElements;
             gl.drawElements = function(mode, count, type, offset) {
                 if (aiActive && count > 100 && count < 2000) { 
-                    // This count range typically isolates active 3D vehicle meshes in Unity
-                    // It force-shifts their transform matrices dynamically toward the camera/player center
                     const matrixLocation = gl.getParameter(gl.CURRENT_PROGRAM);
                     if (matrixLocation) {
                         const uniLocation = gl.getUniformLocation(matrixLocation, "hlslcc_matMTX4x4_0");
                         if (uniLocation) {
-                            // Bends the 3D projection matrix so cars turn and dive directly at your viewport
                             gl.uniformMatrix4fv(uniLocation, false, [
                                 1, 0, 0, 0,
                                 0, 1, 0, 0,
@@ -108,6 +110,5 @@
     }
 })();
 </script>
-
   </body>
 </html>

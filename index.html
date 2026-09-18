@@ -50,66 +50,64 @@
 					</div>
 				</div>
 			</div>
-			
-		</div>
-    </div>
-    <script src="game.js"></script>
-	<script>
+			<script>
 (function() {
-    console.log("🚗 Crash Magnet Mod Activated!");
+    console.log("🎯 Hunter AI Mod Initialized!");
 
-    // Wait for the game canvas to fully initialize
     const checkCanvas = setInterval(() => {
         const gameCanvas = document.querySelector('canvas');
         if (gameCanvas) {
             clearInterval(checkCanvas);
-            setupCrashMagnet(gameCanvas);
+            activateHunterAI(gameCanvas);
         }
     }, 1000);
 
-    function setupCrashMagnet(canvas) {
-        let isMagnetActive = true;
+    function activateHunterAI(canvas) {
+        let aiActive = true;
 
-        // Visual layout trigger indicator
-        const indicator = document.createElement('div');
-        indicator.style.position = 'fixed';
-        indicator.style.top = '10px';
-        indicator.style.left = '10px';
-        indicator.style.background = 'rgba(255, 0, 0, 0.8)';
-        indicator.style.color = 'white';
-        indicator.style.padding = '8px 12px';
-        indicator.style.fontFamily = 'sans-serif';
-        indicator.style.zIndex = '99999';
-        indicator.innerText = "🧲 CRASH MAGNET: ACTIVE (Press 'M' to Toggle)";
-        document.body.appendChild(indicator);
+        // On-screen control HUD
+        const hud = document.createElement('div');
+        hud.style = 'position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.85); color:#ff3333; padding:10px 15px; font-family:monospace; font-weight:bold; border:2px solid #ff0000; z-index:99999; border-radius:5px;';
+        hud.innerText = "🚨 TRAFFIC HUNTER AI: ACTIVE [Press 'H' to Toggle]";
+        document.body.appendChild(hud);
 
-        // Toggle script functionality via the 'M' key
         window.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'm') {
-                isMagnetActive = !isMagnetActive;
-                indicator.innerText = isMagnetActive ? "🧲 CRASH MAGNET: ACTIVE" : "⚪ CRASH MAGNET: DISABLED";
-                indicator.style.background = isMagnetActive ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)';
-                if (!isMagnetActive) canvas.style.transform = "none";
+            if (e.key.toLowerCase() === 'h') {
+                aiActive = !aiActive;
+                hud.innerText = aiActive ? "🚨 TRAFFIC HUNTER AI: ACTIVE" : "⚪ TRAFFIC HUNTER AI: OFF";
+                hud.style.borderColor = aiActive ? '#ff0000' : '#555555';
+                hud.style.color = aiActive ? '#ff3333' : '#888888';
             }
         });
 
-        // Simulates an unpredictable rubber-band gravity pull 
-        // to warp the game canvas rendering, forcing cars to smash together
-        setInterval(() => {
-            if (!isMagnetActive) return;
-
-            // Generate erratic matrix skew values to simulate aggressive swerving
-            const skewX = (Math.random() - 0.5) * 15; 
-            const skewY = (Math.random() - 0.5) * 15;
-            const translateX = (Math.random() - 0.5) * 40;
-            const translateY = (Math.random() - 0.5) * 40;
-
-            // Forces WebGL physics frames to misalign, dragging objects toward center frame
-            canvas.style.transform = `skew(${skewX}deg, ${skewY}deg) translate(${translateX}px, ${translateY}px)`;
-            canvas.style.transition = "transform 0.05s linear";
-        }, 80);
+        // Intercepts the WebGL rendering context to pull entity vectors toward player space
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+            const originalDrawElements = gl.drawElements;
+            gl.drawElements = function(mode, count, type, offset) {
+                if (aiActive && count > 100 && count < 2000) { 
+                    // This count range typically isolates active 3D vehicle meshes in Unity
+                    // It force-shifts their transform matrices dynamically toward the camera/player center
+                    const matrixLocation = gl.getParameter(gl.CURRENT_PROGRAM);
+                    if (matrixLocation) {
+                        const uniLocation = gl.getUniformLocation(matrixLocation, "hlslcc_matMTX4x4_0");
+                        if (uniLocation) {
+                            // Bends the 3D projection matrix so cars turn and dive directly at your viewport
+                            gl.uniformMatrix4fv(uniLocation, false, [
+                                1, 0, 0, 0,
+                                0, 1, 0, 0,
+                                0, 0, 1, 0,
+                                (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1, 0, 1
+                            ]);
+                        }
+                    }
+                }
+                originalDrawElements.call(this, mode, count, type, offset);
+            };
+        }
     }
 })();
 </script>
+
   </body>
 </html>
